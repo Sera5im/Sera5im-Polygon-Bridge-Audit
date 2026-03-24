@@ -37,7 +37,7 @@ function depositFor(
 ````
 ## depositFor
 
-### Pre-conditions (ДО)
+### Pre-conditions 
 | Invariant | Check | Status |
 |-----------|-------|--------|
 | rootToken != ETHER_ADDRESS | require ✅ | closed |
@@ -46,7 +46,7 @@ function depositFor(
 | balanceOf(user) >= amount | no check | ⚠️ → lockTokens |
 | allowance(user, predicate) >= amount | no check | ⚠️ → lockTokens |
 
-### Post-conditions (ПОСЛЕ)
+### Post-conditions 
 | Invariant | Check | Status |
 |-----------|-------|--------|
 | _depositFor called with same args | in code ✅ | closed |
@@ -102,3 +102,31 @@ function _depositFor(
     bytes memory syncData = abi.encode(user, rootToken, depositData);
     _stateSender.syncState(childChainManagerAddress, abi.encode(DEPOSIT, syncData));
 }
+````
+## Invariants
+
+### Pre-conditions 
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| user != address(0) | require ✅ | closed |
+| amount > 0 | no check | ⚠️ → lockTokens |
+| balanceOf(user) >= amount | no check | ⚠️ → lockTokens |
+| allowance(user, predicate) >= amount | no check | ⚠️ → lockTokens |
+| migrationStatus[rootToken].isDepositDisabled == false | check ✅ | closed |
+| tokenToType[rootToken] != 0 | require ✅ | closed |
+| rootToChildToken[rootToken] != address(0) | require ✅ | closed |
+| typeToPredicate[tokenType] != address(0) | require ✅ | closed |
+
+### Post-conditions 
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| balanceOf(predicate) += amount | safeTransferFrom ✅ | closed |
+| balanceOf(user) -= amount | safeTransferFrom ✅ | closed |
+| syncState sent with correct data | in code ✅ | closed |
+
+### Bugs
+- none
+
+### Centralization risks
+- MAPPER_ROLE can set malicious childToken
+- ADMIN can replace StateSender
