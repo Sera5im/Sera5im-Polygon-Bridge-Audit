@@ -184,6 +184,7 @@ function lockTokens(
 
   ---
   ---
+  
 ## StateSender — Off-chain Bridge Component
 
 > **Note:** StateSender is an off-chain infrastructure component operated by Polygon validators.
@@ -191,3 +192,46 @@ function lockTokens(
 > **This component is outside the audit scope** — its logic runs off-chain and cannot be verified on-chain.
 
 **Centralization Risk:** Admin can replace the StateSender address → deposit signals never reach L2 → funds locked on L1 with no way to mint on L2.
+---
+---
+
+````solidity
+
+function onStateReceive(uint256 /* stateId */, bytes calldata data)
+    external 
+    override
+    only(STATE_SYNCER_ROLE) // [Check] Security: Only official Polygon validators/system can call this
+{
+    // [Action] First-Level Decoding
+    // Unpacking the main "envelope" to identify the action type (syncType) 
+    // and the specific content (syncData).
+    (bytes32 syncType, bytes memory syncData) = abi.decode(
+        data,
+        (bytes32, bytes) // syncType is typically a keccak256 hash (e.g., DEPOSIT or MAP_TOKEN)
+    );
+
+    // [Logic] Routing Switch: Determining the action based on the hash
+    if (syncType == DEPOSIT) {
+        // [Action] Deposit Execution
+        // If the hash matches 'DEPOSIT', it triggers the internal minting flow
+        _syncDeposit(syncData);
+        
+    } else if (syncType == MAP_TOKEN) {
+        // [Action] Second-Level Decoding (Registration)
+        // Extracting L1/L2 token addresses and the mapping type from the payload
+        (address rootToken, address childToken, ) = abi.decode(
+            syncData,
+            (address, address, bytes32)
+        );
+        
+        // [Action] Permanent Mapping
+        // Registers the link between the Ethereum (Root) and Polygon (Child) token addresses
+        _mapToken(rootToken, childToken);
+        
+    } else {
+        // [Check] Security Filter
+        // Reverts if the syncType is unrecognized, protecting against corrupted or malicious data
+        revert("ChildChainManager: INVALID_SYNC_TYPE");
+    }
+}
+````
