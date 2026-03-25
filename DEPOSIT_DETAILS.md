@@ -257,4 +257,4 @@ function onStateReceive(uint256 /* stateId */, bytes calldata data)
 - none
 
 ### Centralization risks
-- STATE_SYNCER_ROLE controlled by admin → admin can trigger fake deposits on L2
+- STATE_SYNCER_ROLE controlled by admin → admin can trigger fake deposits on L2(replay attack)
