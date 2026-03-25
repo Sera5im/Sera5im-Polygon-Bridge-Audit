@@ -6,12 +6,16 @@ This section provides a deep-dive analysis of the **Lock-and-Mint** mechanism. W
 
 ## 🖼 Deposit Process Visualization
 
-<img width="512" height="272" alt="image" src="https://github.com/user-attachments/assets/838ba0b8-3d68-4963-8da9-05f596dfea85" />
+<img width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/838ba0b8-3d68-4963-8da9-05f596dfea85" />
 
 ## 🔍 Line-by-Line Code Analysis
 
 ### 1. RootChainManager.sol — `depositFor`
 This is the primary external gateway. It acts as a safety filter before passing the data to the internal engine.
+---
+<img width="600" height="1024" alt="image" src="https://github.com/user-attachments/assets/04be0258-5856-4317-9513-ce1f7438e08c" />
+
+---
 
 ```solidity
 
@@ -185,13 +189,11 @@ function lockTokens(
   ---
   ---
   
-## StateSender — Off-chain Bridge Component
 
-> **Note:** StateSender is an off-chain infrastructure component operated by Polygon validators.
-> It is responsible for relaying the deposit signal from L1 to L2.
-> **This component is outside the audit scope** — its logic runs off-chain and cannot be verified on-chain.
+# StateSender — Off-chain Bridge Component
 
-**Centralization Risk:** Admin can replace the StateSender address → deposit signals never reach L2 → funds locked on L1 with no way to mint on L2.
+StateSender is an off-chain component operated by Polygon validators. It listens for the `LockedERC20` event on L1 and relays the deposit signal to L2 by calling `onStateReceive` on ChildChainManager. Outside the audit scope.
+
 ---
 ---
 
