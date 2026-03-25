@@ -182,3 +182,12 @@ function lockTokens(
 ### Centralization risks
 - none
 
+  ---
+  ---
+## StateSender — Off-chain Bridge Component
+
+> **Note:** StateSender is an off-chain infrastructure component operated by Polygon validators.
+> It is responsible for relaying the deposit signal from L1 to L2.
+> **This component is outside the audit scope** — its logic runs off-chain and cannot be verified on-chain.
+
+**Centralization Risk:** Admin can replace the StateSender address → deposit signals never reach L2 → funds locked on L1 with no way to mint on L2.
