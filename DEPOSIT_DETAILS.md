@@ -130,3 +130,55 @@ function _depositFor(
 ### Centralization risks
 - MAPPER_ROLE can set malicious childToken
 - ADMIN can replace StateSender
+---
+---
+
+### 3.ERC20Predicate.sol — `lockTockens`
+```solidity
+function lockTokens(
+    address depositor,       // The source address providing the funds
+    address depositReceiver, // The destination address on L2
+    address rootToken,       // The ERC20 token being bridged
+    bytes calldata depositData // Encoded transfer parameters (amount)
+)
+    external
+    override
+    only(MANAGER_ROLE) // 🔐 Restricted to RootChainManager
+{
+    // [Action 1] Data Decoding
+    // Unpacking the byte array into a uint256 amount.
+    uint256 amount = abi.decode(depositData, (uint256));
+    
+    // [Action 2] Event Emission
+    // Signaling the lock to off-chain relayers (StateSync).
+    emit LockedERC20(depositor, depositReceiver, rootToken, amount);
+    
+    // [Action 3] Asset Seizure
+    // Transfer tokens from User to the Predicate contract.
+    IERC20(rootToken).safeTransferFrom(depositor, address(this), amount);
+}
+```
+## lockTokens
+
+### Pre-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| only MANAGER_ROLE | modifier ✅ | closed |
+| amount > 0 | no check | ⚠️ → MEDIUM BUG |
+| balanceOf(depositor) >= amount | safeTransferFrom ✅ | closed |
+| allowance(depositor, predicate) >= amount | safeTransferFrom ✅ | closed |
+
+### Post-conditions (ПОСЛЕ)
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| balanceOf(predicate) += amount | safeTransferFrom ✅ | closed |
+| balanceOf(depositor) -= amount | safeTransferFrom ✅ | closed |
+| LockedERC20 event emitted | in code ✅ | closed |
+
+### Bugs
+- [MEDIUM] amount > 0 not checked anywhere in deposit flow
+  → zero deposit possible → griefing attack on validators
+
+### Centralization risks
+- none
+
