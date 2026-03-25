@@ -39,7 +39,7 @@ function depositFor(
 
 
 ````
-## depositFor
+## Invariants
 
 ### Pre-conditions 
 | Invariant | Check | Status |
@@ -60,7 +60,7 @@ function depositFor(
 
 ### Centralization risks
 - none
-- 
+
 ---
 ---
 
@@ -236,4 +236,25 @@ function onStateReceive(uint256 /* stateId */, bytes calldata data)
         revert("ChildChainManager: INVALID_SYNC_TYPE");
     }
 }
+
 ````
+## Invariants
+
+### Pre-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| only STATE_SYNCER_ROLE | modifier ✅ | closed |
+| syncType is valid | revert ✅ | closed |
+| data correctly encoded | abi.decode ✅ | closed |
+
+### Post-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| _syncDeposit called if syncType == DEPOSIT | in code ✅ | closed |
+| _mapToken called if syncType == MAP_TOKEN | in code ✅ | closed |
+
+### Bugs
+- none
+
+### Centralization risks
+- STATE_SYNCER_ROLE controlled by admin → admin can trigger fake deposits on L2
