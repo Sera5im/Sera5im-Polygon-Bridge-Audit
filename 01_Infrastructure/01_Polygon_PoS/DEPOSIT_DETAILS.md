@@ -255,17 +255,19 @@ function onStateReceive(uint256 /* stateId */, bytes calldata data)
 
 ### Bugs
 - none
-  
----
----
 
 ### Centralization risks
 - STATE_SYNCER_ROLE controlled by admin → admin can trigger fake deposits on L2(replay attack)
+
+ ---
+ ---
+ 
 - ### 5. ChildChainManager.sol — `_syncDeposit`
 
 This is the final step of the deposit flow on L2 (Polygon). It receives the validated signal from the Ethereum side and triggers the actual minting of assets.
 
 ```solidity
+
 function _syncDeposit(bytes memory syncData) internal {
     // [Action 1] Data Decoding
     // Extracting the user address, the root token (L1), and the specific deposit payload.
@@ -289,6 +291,7 @@ function _syncDeposit(bytes memory syncData) internal {
     // Calling the .deposit() function on the ChildToken contract to credit the user.
     IChildToken(childTokenAddress).deposit(user, depositData);
 }
+```
 ## Invariants
 
 ### Pre-conditions
