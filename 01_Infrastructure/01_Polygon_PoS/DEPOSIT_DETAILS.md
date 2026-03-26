@@ -198,7 +198,7 @@ StateSender is an off-chain component operated by Polygon validators. It listens
 ---
 ---
 - ### 5. ChildChainManager.sol — `onStateReceive`
-
+This is the main entry point on the Polygon (L2) side. It acts as a "Postman" that receives messages from the Ethereum StateSender and routes them to the correct internal logic (Deposit or Token Mapping).
 
 ````solidity
 
