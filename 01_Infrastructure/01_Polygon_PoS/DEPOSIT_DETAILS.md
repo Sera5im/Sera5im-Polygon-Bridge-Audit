@@ -255,6 +255,61 @@ function onStateReceive(uint256 /* stateId */, bytes calldata data)
 
 ### Bugs
 - none
+  
+---
+---
 
 ### Centralization risks
 - STATE_SYNCER_ROLE controlled by admin → admin can trigger fake deposits on L2(replay attack)
+- ### 5. ChildChainManager.sol — `_syncDeposit`
+
+This is the final step of the deposit flow on L2 (Polygon). It receives the validated signal from the Ethereum side and triggers the actual minting of assets.
+
+```solidity
+function _syncDeposit(bytes memory syncData) internal {
+    // [Action 1] Data Decoding
+    // Extracting the user address, the root token (L1), and the specific deposit payload.
+    (address user, address rootToken, bytes memory depositData) = abi.decode(
+        syncData,
+        (address, address, bytes)
+    );
+
+    // [Action 2] Mapping Lookup
+    // Finding the corresponding L2 token address for the provided L1 root token.
+    address childTokenAddress = rootToChildToken[rootToken];
+
+    // [Check] Integrity Guard
+    // Ensuring the token is registered in the bridge system before proceeding.
+    require(
+        childTokenAddress != address(0),
+        "ChildChainManager: TOKEN_NOT_MAPPED"
+    );
+
+    // [Action 3] Minting / Deposit Execution
+    // Calling the .deposit() function on the ChildToken contract to credit the user.
+    IChildToken(childTokenAddress).deposit(user, depositData);
+}
+## Invariants
+
+### Pre-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| rootToChildToken[rootToken] != address(0) | require ✅ | closed |
+| amount > 0 | no check | ⚠️ → deposit() |
+| user != address(0) | no check | ⚠️ → deposit() |
+
+### Post-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| balanceOf(user) on L2 += amount | deposit() ✅ | closed |
+| correct childToken called | rootToChildToken ✅ | closed |
+
+### Bugs
+- none
+
+### Centralization risks
+- MAPPER_ROLE can set malicious childTokenAddress
+````
+
+---
+---
