@@ -13,7 +13,8 @@ This section provides a deep-dive analysis of the **Lock-and-Mint** mechanism. W
 ### 1. RootChainManager.sol — `depositFor`
 This is the primary external gateway. It acts as a safety filter before passing the data to the internal engine.
 ---
-<img width="600" height="1024" alt="image" src="https://github.com/user-attachments/assets/04be0258-5856-4317-9513-ce1f7438e08c" />
+<img width="600" height="1024" alt="image" src="https://github.com/user-attachments/assets/03fbc252-1705-439b-92b4-2a1416f9e73e" />
+
 
 ---
 
@@ -258,3 +259,60 @@ function onStateReceive(uint256 /* stateId */, bytes calldata data)
 
 ### Centralization risks
 - STATE_SYNCER_ROLE controlled by admin → admin can trigger fake deposits on L2(replay attack)
+
+---
+---
+
+### 5. ChildChainManager.sol — `_syncDeposit`
+
+This is the final step of the deposit flow on L2 (Polygon). It receives the validated signal from the Ethereum side and triggers the actual minting of assets.
+
+```solidity
+function _syncDeposit(bytes memory syncData) internal {
+    // [Action 1] Data Decoding
+    // Extracting the user address, the root token (L1), and the specific deposit payload.
+    (address user, address rootToken, bytes memory depositData) = abi.decode(
+        syncData,
+        (address, address, bytes)
+    );
+
+    // [Action 2] Mapping Lookup
+    // Finding the corresponding L2 token address for the provided L1 root token.
+    address childTokenAddress = rootToChildToken[rootToken];
+
+    // [Check] Integrity Guard
+    // Ensuring the token is registered in the bridge system before proceeding.
+    require(
+        childTokenAddress != address(0),
+        "ChildChainManager: TOKEN_NOT_MAPPED"
+    );
+
+    // [Action 3] Minting / Deposit Execution
+    // Calling the .deposit() function on the ChildToken contract to credit the user.
+    IChildToken(childTokenAddress).deposit(user, depositData);
+}
+```
+
+## Invariants
+
+### Pre-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| rootToChildToken[rootToken] != address(0) | require ✅ | closed |
+| amount > 0 | no check | ⚠️ → deposit() |
+| user != address(0) | no check | ⚠️ → deposit() |
+
+### Post-conditions
+| Invariant | Check | Status |
+|-----------|-------|--------|
+| balanceOf(user) on L2 += amount | deposit() ✅ | closed |
+| correct childToken called | rootToChildToken ✅ | closed |
+
+### Bugs
+- none
+
+### Centralization risks
+- MAPPER_ROLE can set malicious childTokenAddress
+
+---
+---
