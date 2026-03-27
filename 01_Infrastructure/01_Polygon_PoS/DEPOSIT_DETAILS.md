@@ -13,7 +13,8 @@ This section provides a deep-dive analysis of the **Lock-and-Mint** mechanism. W
 ### 1. RootChainManager.sol — `depositFor`
 This is the primary external gateway. It acts as a safety filter before passing the data to the internal engine.
 ---
-<img width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/e2fa5bef-529c-46b3-b4f8-d5372e48a043" />
+<img width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/7ebf5e0b-5c29-405a-a890-34d4651af0ad" />
+
 
 
 ---
