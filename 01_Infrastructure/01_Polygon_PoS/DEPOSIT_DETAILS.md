@@ -8,7 +8,32 @@ This section provides a deep-dive analysis of the **Lock-and-Mint** mechanism. W
 
 <img width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/838ba0b8-3d68-4963-8da9-05f596dfea85" />
 
+
+### How It Works
+
+**Step 1 — User initiates deposit on L1.**
+The user calls `depositFor()` on RootChainManager, specifying the recipient address on L2, the token, and the amount.
+
+
+#**Step 2 — Tokens are locked on L1.**
+`lockTokens()` transfers the tokens from the user to the ERC20Predicate contract. The tokens are held in custody on Ethereum until the user withdraws.
+
+
+#**Step 3 — Signal is sent to L2.**
+`_depositFor()` calls StateSender which emits a sync event. Polygon validators pick up this event off-chain and relay it to L2.
+
+
+#**Step 4 — L2 receives the signal.**
+`onStateReceive()` on ChildChainManager is triggered by the validators. It decodes the message and routes it to `_syncDeposit()`.
+
+
+#**Step 5 — Tokens are minted on L2.**
+`_syncDeposit()` finds the corresponding L2 token address and calls `deposit()` on the ChildToken contract. The user receives the tokens on Polygon.
+
+---
+---
 ## 🔍 Line-by-Line Code Analysis
+
 
 ### 1. RootChainManager.sol — `depositFor`
 This is the primary external gateway. It acts as a safety filter before passing the data to the internal engine.
@@ -68,7 +93,7 @@ function depositFor(
 
 ### 2.RootChainManager.sol — `_depositFor`
 
- It performs deep security checks, locks the assets on Ethereum (L1), and triggers the minting process on Polygon (L2).
+It performs deep security checks, locks the assets on Ethereum (L1), and sends a signal to Polygon validators (off-chain) to mint the corresponding tokens on L2.
  
  ---
  
