@@ -97,7 +97,8 @@ It performs deep security checks, locks the assets on Ethereum (L1), and sends a
  
  ---
  
-<img  width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/e73ed763-a47b-4cd2-b411-91af89817d1a" />
+<img width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/982c8b6d-3126-4147-beb8-6e4c781748fa" />
+
 
 
 
