@@ -68,6 +68,9 @@ function depositFor(
 ### 2.RootChainManager.sol — `_depositFor`
 
  It performs deep security checks, locks the assets on Ethereum (L1), and triggers the minting process on Polygon (L2).
+<img width="800" height="1024" alt="image" src="https://github.com/user-attachments/assets/25b83ce1-a887-4c6d-a6db-b2b9237a3900" />
+
+---
 
 ```solidity
 function _depositFor(
