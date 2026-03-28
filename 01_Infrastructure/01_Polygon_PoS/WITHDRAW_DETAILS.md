@@ -1,3 +1,3 @@
-# 📥 Deposit Flow: Technical Breakdown (L1 → L2)
+# 📤 Withdraw Flow: Technical Breakdown (L2 → L1)
 
-This section provides a deep-dive analysis of the **Lock-and-Mint** mechanism. We trace the asset's path from the user's transaction on Ethereum to the state synchronization event.
+This section provides a deep-dive analysis of the **Burn-and-Unlock** mechanism. We trace the asset's path from the user's burn transaction on Polygon to the token release on Ethereum.
